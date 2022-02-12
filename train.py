@@ -15,7 +15,7 @@ from collections import defaultdict
 from focal_loss import BinaryFocalLoss
 from TrackNet import ResNet_Track
 from tensorflow import keras
-from parser import parser
+from parser_test import parser
 from tensorflow.keras import backend as K
 
 args = parser.parse_args()

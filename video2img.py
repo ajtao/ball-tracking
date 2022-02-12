@@ -2,7 +2,7 @@ import os
 import cv2
 import glob
 import numpy as np
-from parser import parser
+from parser_test import parser
 from utils import genHeatMap
 
 args = parser.parse_args()
