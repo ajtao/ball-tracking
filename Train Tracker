@@ -1,0 +1,212 @@
+{
+  "nbformat": 4,
+  "nbformat_minor": 0,
+  "metadata": {
+    "colab": {
+      "name": "Untitled4.ipynb",
+      "provenance": [],
+      "authorship_tag": "ABX9TyNKoyZos1dycP6v/XpO2vwj",
+      "include_colab_link": true
+    },
+    "kernelspec": {
+      "name": "python3",
+      "display_name": "Python 3"
+    },
+    "language_info": {
+      "name": "python"
+    },
+    "accelerator": "GPU"
+  },
+  "cells": [
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "view-in-github",
+        "colab_type": "text"
+      },
+      "source": [
+        "<a href=\"https://colab.research.google.com/github/stevearonson/TrackNet-Badminton-Tracking-tensorflow2/blob/main/Train%20Tracker\" target=\"_parent\"><img src=\"https://colab.research.google.com/assets/colab-badge.svg\" alt=\"Open In Colab\"/></a>"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "!pip install piexif\n",
+        "!pip install focal_loss"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "8hcXcv6RhGvo",
+        "outputId": "032744c3-9938-4393-cdfd-945c2bd1d8bf"
+      },
+      "execution_count": 1,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Collecting piexif\n",
+            "  Downloading piexif-1.1.3-py2.py3-none-any.whl (20 kB)\n",
+            "Installing collected packages: piexif\n",
+            "Successfully installed piexif-1.1.3\n",
+            "Collecting focal_loss\n",
+            "  Downloading focal_loss-0.0.7-py3-none-any.whl (19 kB)\n",
+            "Requirement already satisfied: tensorflow>=2.2 in /usr/local/lib/python3.7/dist-packages (from focal_loss) (2.7.0)\n",
+            "Requirement already satisfied: astunparse>=1.6.0 in /usr/local/lib/python3.7/dist-packages (from tensorflow>=2.2->focal_loss) (1.6.3)\n",
+            "Requirement already satisfied: h5py>=2.9.0 in /usr/local/lib/python3.7/dist-packages (from tensorflow>=2.2->focal_loss) (3.1.0)\n",
+            "Requirement already satisfied: absl-py>=0.4.0 in /usr/local/lib/python3.7/dist-packages (from tensorflow>=2.2->focal_loss) (1.0.0)\n",
+            "Requirement already satisfied: grpcio<2.0,>=1.24.3 in /usr/local/lib/python3.7/dist-packages (from tensorflow>=2.2->focal_loss) (1.43.0)\n",
+            "Requirement already satisfied: tensorflow-estimator<2.8,~=2.7.0rc0 in /usr/local/lib/python3.7/dist-packages (from tensorflow>=2.2->focal_loss) (2.7.0)\n",
+            "Requirement already satisfied: wheel<1.0,>=0.32.0 in /usr/local/lib/python3.7/dist-packages (from tensorflow>=2.2->focal_loss) (0.37.1)\n",
+            "Requirement already satisfied: wrapt>=1.11.0 in /usr/local/lib/python3.7/dist-packages (from tensorflow>=2.2->focal_loss) (1.13.3)\n",
+            "Requirement already satisfied: six>=1.12.0 in /usr/local/lib/python3.7/dist-packages (from tensorflow>=2.2->focal_loss) (1.15.0)\n",
+            "Requirement already satisfied: keras<2.8,>=2.7.0rc0 in /usr/local/lib/python3.7/dist-packages (from tensorflow>=2.2->focal_loss) (2.7.0)\n",
+            "Requirement already satisfied: typing-extensions>=3.6.6 in /usr/local/lib/python3.7/dist-packages (from tensorflow>=2.2->focal_loss) (3.10.0.2)\n",
+            "Requirement already satisfied: google-pasta>=0.1.1 in /usr/local/lib/python3.7/dist-packages (from tensorflow>=2.2->focal_loss) (0.2.0)\n",
+            "Requirement already satisfied: gast<0.5.0,>=0.2.1 in /usr/local/lib/python3.7/dist-packages (from tensorflow>=2.2->focal_loss) (0.4.0)\n",
+            "Requirement already satisfied: opt-einsum>=2.3.2 in /usr/local/lib/python3.7/dist-packages (from tensorflow>=2.2->focal_loss) (3.3.0)\n",
+            "Requirement already satisfied: protobuf>=3.9.2 in /usr/local/lib/python3.7/dist-packages (from tensorflow>=2.2->focal_loss) (3.17.3)\n",
+            "Requirement already satisfied: termcolor>=1.1.0 in /usr/local/lib/python3.7/dist-packages (from tensorflow>=2.2->focal_loss) (1.1.0)\n",
+            "Requirement already satisfied: numpy>=1.14.5 in /usr/local/lib/python3.7/dist-packages (from tensorflow>=2.2->focal_loss) (1.19.5)\n",
+            "Requirement already satisfied: tensorboard~=2.6 in /usr/local/lib/python3.7/dist-packages (from tensorflow>=2.2->focal_loss) (2.7.0)\n",
+            "Requirement already satisfied: libclang>=9.0.1 in /usr/local/lib/python3.7/dist-packages (from tensorflow>=2.2->focal_loss) (13.0.0)\n",
+            "Requirement already satisfied: keras-preprocessing>=1.1.1 in /usr/local/lib/python3.7/dist-packages (from tensorflow>=2.2->focal_loss) (1.1.2)\n",
+            "Requirement already satisfied: tensorflow-io-gcs-filesystem>=0.21.0 in /usr/local/lib/python3.7/dist-packages (from tensorflow>=2.2->focal_loss) (0.24.0)\n",
+            "Requirement already satisfied: flatbuffers<3.0,>=1.12 in /usr/local/lib/python3.7/dist-packages (from tensorflow>=2.2->focal_loss) (2.0)\n",
+            "Requirement already satisfied: cached-property in /usr/local/lib/python3.7/dist-packages (from h5py>=2.9.0->tensorflow>=2.2->focal_loss) (1.5.2)\n",
+            "Requirement already satisfied: markdown>=2.6.8 in /usr/local/lib/python3.7/dist-packages (from tensorboard~=2.6->tensorflow>=2.2->focal_loss) (3.3.6)\n",
+            "Requirement already satisfied: setuptools>=41.0.0 in /usr/local/lib/python3.7/dist-packages (from tensorboard~=2.6->tensorflow>=2.2->focal_loss) (57.4.0)\n",
+            "Requirement already satisfied: tensorboard-plugin-wit>=1.6.0 in /usr/local/lib/python3.7/dist-packages (from tensorboard~=2.6->tensorflow>=2.2->focal_loss) (1.8.1)\n",
+            "Requirement already satisfied: google-auth-oauthlib<0.5,>=0.4.1 in /usr/local/lib/python3.7/dist-packages (from tensorboard~=2.6->tensorflow>=2.2->focal_loss) (0.4.6)\n",
+            "Requirement already satisfied: google-auth<3,>=1.6.3 in /usr/local/lib/python3.7/dist-packages (from tensorboard~=2.6->tensorflow>=2.2->focal_loss) (1.35.0)\n",
+            "Requirement already satisfied: werkzeug>=0.11.15 in /usr/local/lib/python3.7/dist-packages (from tensorboard~=2.6->tensorflow>=2.2->focal_loss) (1.0.1)\n",
+            "Requirement already satisfied: requests<3,>=2.21.0 in /usr/local/lib/python3.7/dist-packages (from tensorboard~=2.6->tensorflow>=2.2->focal_loss) (2.23.0)\n",
+            "Requirement already satisfied: tensorboard-data-server<0.7.0,>=0.6.0 in /usr/local/lib/python3.7/dist-packages (from tensorboard~=2.6->tensorflow>=2.2->focal_loss) (0.6.1)\n",
+            "Requirement already satisfied: pyasn1-modules>=0.2.1 in /usr/local/lib/python3.7/dist-packages (from google-auth<3,>=1.6.3->tensorboard~=2.6->tensorflow>=2.2->focal_loss) (0.2.8)\n",
+            "Requirement already satisfied: rsa<5,>=3.1.4 in /usr/local/lib/python3.7/dist-packages (from google-auth<3,>=1.6.3->tensorboard~=2.6->tensorflow>=2.2->focal_loss) (4.8)\n",
+            "Requirement already satisfied: cachetools<5.0,>=2.0.0 in /usr/local/lib/python3.7/dist-packages (from google-auth<3,>=1.6.3->tensorboard~=2.6->tensorflow>=2.2->focal_loss) (4.2.4)\n",
+            "Requirement already satisfied: requests-oauthlib>=0.7.0 in /usr/local/lib/python3.7/dist-packages (from google-auth-oauthlib<0.5,>=0.4.1->tensorboard~=2.6->tensorflow>=2.2->focal_loss) (1.3.1)\n",
+            "Requirement already satisfied: importlib-metadata>=4.4 in /usr/local/lib/python3.7/dist-packages (from markdown>=2.6.8->tensorboard~=2.6->tensorflow>=2.2->focal_loss) (4.10.1)\n",
+            "Requirement already satisfied: zipp>=0.5 in /usr/local/lib/python3.7/dist-packages (from importlib-metadata>=4.4->markdown>=2.6.8->tensorboard~=2.6->tensorflow>=2.2->focal_loss) (3.7.0)\n",
+            "Requirement already satisfied: pyasn1<0.5.0,>=0.4.6 in /usr/local/lib/python3.7/dist-packages (from pyasn1-modules>=0.2.1->google-auth<3,>=1.6.3->tensorboard~=2.6->tensorflow>=2.2->focal_loss) (0.4.8)\n",
+            "Requirement already satisfied: chardet<4,>=3.0.2 in /usr/local/lib/python3.7/dist-packages (from requests<3,>=2.21.0->tensorboard~=2.6->tensorflow>=2.2->focal_loss) (3.0.4)\n",
+            "Requirement already satisfied: certifi>=2017.4.17 in /usr/local/lib/python3.7/dist-packages (from requests<3,>=2.21.0->tensorboard~=2.6->tensorflow>=2.2->focal_loss) (2021.10.8)\n",
+            "Requirement already satisfied: idna<3,>=2.5 in /usr/local/lib/python3.7/dist-packages (from requests<3,>=2.21.0->tensorboard~=2.6->tensorflow>=2.2->focal_loss) (2.10)\n",
+            "Requirement already satisfied: urllib3!=1.25.0,!=1.25.1,<1.26,>=1.21.1 in /usr/local/lib/python3.7/dist-packages (from requests<3,>=2.21.0->tensorboard~=2.6->tensorflow>=2.2->focal_loss) (1.24.3)\n",
+            "Requirement already satisfied: oauthlib>=3.0.0 in /usr/local/lib/python3.7/dist-packages (from requests-oauthlib>=0.7.0->google-auth-oauthlib<0.5,>=0.4.1->tensorboard~=2.6->tensorflow>=2.2->focal_loss) (3.2.0)\n",
+            "Installing collected packages: focal-loss\n",
+            "Successfully installed focal-loss-0.0.7\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": 2,
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "Y5LaSaunglIN",
+        "outputId": "c6add6bb-f946-4ce9-95bd-1e27e5c4687f"
+      },
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Cloning into 'TrackNet-Badminton-Tracking-tensorflow2'...\n",
+            "remote: Enumerating objects: 692, done.\u001b[K\n",
+            "remote: Counting objects: 100% (692/692), done.\u001b[K\n",
+            "remote: Compressing objects: 100% (681/681), done.\u001b[K\n",
+            "remote: Total 692 (delta 34), reused 651 (delta 7), pack-reused 0\u001b[K\n",
+            "Receiving objects: 100% (692/692), 103.89 MiB | 45.43 MiB/s, done.\n",
+            "Resolving deltas: 100% (34/34), done.\n"
+          ]
+        }
+      ],
+      "source": [
+        "!git clone https://github.com/stevearonson/TrackNet-Badminton-Tracking-tensorflow2"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "%cd TrackNet-Badminton-Tracking-tensorflow2/"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "nodZdJlcg46V",
+        "outputId": "83a10af9-b3ff-41b7-b24b-3fb8ab9e5407"
+      },
+      "execution_count": 3,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "/content/TrackNet-Badminton-Tracking-tensorflow2\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "%run train.py"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 602
+        },
+        "id": "KUdHQDjeg-_9",
+        "outputId": "a568a563-9bbb-4e06-cd7c-5e1a91b343c5"
+      },
+      "execution_count": 4,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stderr",
+          "text": [
+            "/usr/local/lib/python3.7/dist-packages/keras/optimizer_v2/adadelta.py:74: UserWarning: The `lr` argument is deprecated, use `learning_rate` instead.\n",
+            "  super(Adadelta, self).__init__(name, **kwargs)\n"
+          ]
+        },
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Beginning training......\n",
+            "==========Epoch 0, Train steps: 298, Learning rate: 1.0000==========\n",
+            "298/298 [==============================] - 101s 300ms/step - loss: 2.0738e-04 - binary_accuracy: 0.9998\n",
+            "==========Epoch 0 start validation==========\n",
+            "Epoch 0 accuracy: 0.124\n",
+            "Epoch 0 precision: 0.000\n",
+            "Epoch 0 recall: 0.000\n",
+            "Epoch 0 average = (accuracy + precision + recall)/3: 0.041\n",
+            "==========Epoch 1, Train steps: 298, Learning rate: 1.0000==========\n",
+            "298/298 [==============================] - 89s 300ms/step - loss: 3.7543e-05 - binary_accuracy: 0.9998\n",
+            "==========Epoch 1 start validation==========\n"
+          ]
+        },
+        {
+          "output_type": "error",
+          "ename": "ValueError",
+          "evalue": "ignored",
+          "traceback": [
+            "\u001b[0;31m---------------------------------------------------------------------------\u001b[0m",
+            "\u001b[0;31mValueError\u001b[0m                                Traceback (most recent call last)",
+            "\u001b[0;32m/content/TrackNet-Badminton-Tracking-tensorflow2/train.py\u001b[0m in \u001b[0;36m<module>\u001b[0;34m()\u001b[0m\n\u001b[1;32m     66\u001b[0m                 \u001b[0my_pred\u001b[0m \u001b[0;34m=\u001b[0m \u001b[0my_pred\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mastype\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0;34m'float32'\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m     67\u001b[0m \u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0;32m---> 68\u001b[0;31m                 \u001b[0mtp\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mtn\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mfp1\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mfp2\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mfn\u001b[0m \u001b[0;34m=\u001b[0m \u001b[0mconfusion\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0my_pred\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0my_batch\u001b[0m\u001b[0;34m[\u001b[0m\u001b[0;34m:\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0;36m0\u001b[0m\u001b[0;34m,\u001b[0m\u001b[0;34m...\u001b[0m\u001b[0;34m]\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mtol\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0m\u001b[1;32m     69\u001b[0m                 \u001b[0mTP\u001b[0m \u001b[0;34m+=\u001b[0m \u001b[0mtp\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m     70\u001b[0m                 \u001b[0mTN\u001b[0m \u001b[0;34m+=\u001b[0m \u001b[0mtn\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n",
+            "\u001b[0;32m/content/TrackNet-Badminton-Tracking-tensorflow2/utils.py\u001b[0m in \u001b[0;36mconfusion\u001b[0;34m(y_pred, y_true, tol)\u001b[0m\n\u001b[1;32m    187\u001b[0m         \u001b[0;32melif\u001b[0m \u001b[0mnp\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mamax\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0mh_pred\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m>\u001b[0m\u001b[0;36m0\u001b[0m \u001b[0;32mand\u001b[0m \u001b[0mnp\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mamax\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0mh_true\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m>\u001b[0m\u001b[0;36m0\u001b[0m\u001b[0;34m:\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m    188\u001b[0m             \u001b[0;31m# find center of ball for prediction\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0;32m--> 189\u001b[0;31m             \u001b[0m_\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mcontours\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0m_\u001b[0m \u001b[0;34m=\u001b[0m \u001b[0mcv2\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mfindContours\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0mh_pred\u001b[0m\u001b[0;34m[\u001b[0m\u001b[0;36m0\u001b[0m\u001b[0;34m]\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mcopy\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mcv2\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mRETR_EXTERNAL\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mcv2\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mCHAIN_APPROX_SIMPLE\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0m\u001b[1;32m    190\u001b[0m             \u001b[0mbboxes\u001b[0m \u001b[0;34m=\u001b[0m \u001b[0;34m[\u001b[0m\u001b[0mcv2\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mboundingRect\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0mcnt\u001b[0m\u001b[0;34m)\u001b[0m \u001b[0;32mfor\u001b[0m \u001b[0mcnt\u001b[0m \u001b[0;32min\u001b[0m \u001b[0mcontours\u001b[0m\u001b[0;34m]\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m    191\u001b[0m \u001b[0;34m\u001b[0m\u001b[0m\n",
+            "\u001b[0;31mValueError\u001b[0m: not enough values to unpack (expected 3, got 2)"
+          ]
+        }
+      ]
+    }
+  ]
+}
