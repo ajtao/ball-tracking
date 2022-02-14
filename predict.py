@@ -9,7 +9,7 @@ import tensorflow as tf
 import tensorflow.keras.backend as K
 from utils import *
 from glob import glob
-from parser import parser
+from parser_test import parser
 from TrackNet import ResNet_Track
 from focal_loss import BinaryFocalLoss
 from collections import deque
@@ -134,7 +134,8 @@ while success:
 	if np.amax(h_pred) <= 0:
 		out.write(image)
 	else:
-		_, cnts, _ = cv2.findContours(h_pred[0].copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+		# _, cnts, _ = cv2.findContours(h_pred[0].copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+		cnts, _ = cv2.findContours(h_pred[0].copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 		rects = [cv2.boundingRect(ctr) for ctr in cnts]
 		max_area_idx = 0
 		max_area = rects[max_area_idx][2] * rects[max_area_idx][3]
