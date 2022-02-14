@@ -13,7 +13,7 @@ def genHeatMap(w, h, cx, cy, r, mag):
     generate heat map of tracking badminton
 
     param:
-    w: width of output heat map 
+    w: width of output heat map
     h: height of output heat map
     cx: x coordinate of badminton
     cy: y coordinate of badminton
@@ -36,12 +36,12 @@ def split_train_test(match_list, ratio=0.9, shuffle=True):
     param:
     match_list --> list of match folder path
     ratio --> split ratio
-    shuffle --> boolean to indicate whether to shuffle match_list 
+    shuffle --> boolean to indicate whether to shuffle match_list
                 before generating dataset lists
     """
     if shuffle:
         random.shuffle(match_list)
-        
+
     n_match = len(match_list)
     train_match = match_list[:int(n_match*ratio)]
     test_match = match_list[int(n_match*ratio):]
@@ -64,7 +64,7 @@ def split_train_test(match_list, ratio=0.9, shuffle=True):
 def read_img(file, hmap=False):
     """
     Read image from path and convert to format suitable for model
-    
+
     param:
     file --> path of image file
     hmap --> boolean to indicate whether image is heat map or not
@@ -78,7 +78,7 @@ def read_img(file, hmap=False):
     img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     img = np.expand_dims(img, 0)
     return img.astype('float')/255.
-	
+
 def check_steps(img_paths, batch_size, frame_stack):
     """
     Compute how many steps required for an training epoch
@@ -96,7 +96,7 @@ def check_steps(img_paths, batch_size, frame_stack):
     n_steps = 0
     for count in frame_counts.values():
         n_steps += (count - (frame_stack-1))//batch_size
-    
+
     return n_steps - 1
 
 def data_generator(batch_size, x_list, y_list, frame_stack):
@@ -113,7 +113,7 @@ def data_generator(batch_size, x_list, y_list, frame_stack):
     y_list = sorted(y_list)
     data_size = len(x_list)
 
-	# initialize images and heatmaps array
+    # initialize images and heatmaps array
     END = False
     end = (frame_stack-1) + (batch_size-1)
     images = [read_img(path) for path in x_list[:frame_stack]]
@@ -121,8 +121,8 @@ def data_generator(batch_size, x_list, y_list, frame_stack):
     while True:
         batch_imgs = []
         batch_hmaps = []
-		
-		# dynamically pop and append a new image to avoid multiple reading
+
+        # dynamically pop and append a new image to avoid multiple reading
         for i in reversed(range(batch_size)):
             img = np.concatenate(images, axis=0)
             batch_imgs.append(img)
@@ -131,13 +131,13 @@ def data_generator(batch_size, x_list, y_list, frame_stack):
 
             batch_hmaps.append(hmap)
             hmap = read_img(y_list[end], hmap=True)
-			
+
             end += 1
             if end >= data_size:
                 END = True
                 break
-			
-			# if image comes from different video, reset images and heat_maps
+
+            # if image comes from different video, reset images and heat_maps
             next_info = os.path.split(x_list[end])[-1].split('_')
             curr_info = os.path.split(x_list[end-1])[-1].split('_')
             if next_info[:-1] != curr_info[:-1]:
@@ -151,7 +151,7 @@ def data_generator(batch_size, x_list, y_list, frame_stack):
             images = [read_img(path) for path in x_list[:frame_stack]]
             hmap = read_img(y_list[frame_stack-1], hmap=True)
             continue
-        
+
         yield np.array(batch_imgs), np.array(batch_hmaps)
 
 def confusion(y_pred, y_true, tol):
@@ -161,16 +161,16 @@ def confusion(y_pred, y_true, tol):
     TN: True negative
     FP2: False positive
     FN: False negative
-    FP1: If distance of ball center between 
+    FP1: If distance of ball center between
          ground truth and prediction is larger than tolerance
 
     param:
     y_pred --> predicted heat map
     y_true --> ground truth heat map
-    tol --> acceptable tolerance of heat map circle center 
+    tol --> acceptable tolerance of heat map circle center
             between ground truth and prediction
     """
-    
+
     batch_size = y_pred.shape[0]
     TP = TN = FP1 = FP2 = FN = 0
     for b in range(batch_size):
@@ -186,7 +186,8 @@ def confusion(y_pred, y_true, tol):
             FN += 1
         elif np.amax(h_pred)>0 and np.amax(h_true)>0:
             # find center of ball for prediction
-            _, contours, _ = cv2.findContours(h_pred[0].copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+            # _, contours, _ = cv2.findContours(h_pred[0].copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+            contours, _ = cv2.findContours(h_pred[0].copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
             bboxes = [cv2.boundingRect(cnt) for cnt in contours]
 
             areas = np.array([bbox[2] * bbox[3] for bbox in bboxes])
@@ -209,7 +210,7 @@ def confusion(y_pred, y_true, tol):
                 FP1 += 1
             else:
                 TP += 1
-    
+
     return (TP, TN, FP1, FP2, FN)
 
 def compute_acc(evaluation):
@@ -221,9 +222,9 @@ def compute_acc(evaluation):
     """
     (TP, TN, FP1, FP2, FN) = evaluation
     try:
-	    accuracy = (TP + TN) / (TP + TN + FP1 + FP2 + FN)
+        accuracy = (TP + TN) / (TP + TN + FP1 + FP2 + FN)
     except:
-	    accuracy = 0
+        accuracy = 0
     try:
         precision = TP / (TP + FP1 + FP2)
     except:
