@@ -47,6 +47,9 @@ if __name__ == '__main__':
             df['y'] = (df['bb_top'] + df['bb_height']/2) / frame_height
 
             # reindex to fill in missing frames
+            # change Frame start from 1 to 0
+            df['Frame'] = df['Frame'] - 1
+            
             full_index = pd.Index(range(0, frame_count), name='Frame')
             df = df.set_index('Frame').reindex(full_index).reset_index()
             df.loc[df['Ball'].isna(), ['Ball', 'x', 'y']] = [0, -1, -1]
