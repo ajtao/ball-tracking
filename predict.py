@@ -87,6 +87,10 @@ fourcc = cv2.VideoWriter_fourcc(*'mp4v')
 out = cv2.VideoWriter(video_name+'_predict.mp4', fourcc, fps, size)
 out.write(image)
 
+# create a ball location CSV
+ball_loc = open(video_name + '_predict.csv', 'w')
+ball_loc.write('Frame, X, Y')
+
 img = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 img = np.expand_dims(img, axis=2)
 gray_imgs.append(img)
@@ -133,6 +137,7 @@ while success:
 	h_pred = h_pred.astype('uint8')
 	if np.amax(h_pred) <= 0:
 		out.write(image)
+        ball_loc,write(',,')
 	else:
 		# _, cnts, _ = cv2.findContours(h_pred[0].copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 		cnts, _ = cv2.findContours(h_pred[0].copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
@@ -150,6 +155,9 @@ while success:
 		image_cp = np.copy(image)
 		cv2.circle(image_cp, (cx_pred, cy_pred), 5, (0,0,255), -1)
 		out.write(image_cp)
+        
+        ball_loc.write('%d, %d, %d' % (frame_no, cx_pred, cy_pred))
+
 
 	success, image = cap.read()
 	if success:
@@ -160,6 +168,8 @@ while success:
 		frame_no += 1
 
 out.release()
+ball_loc.close()
+
 total_time = sum(time_list)
 
 if compute:
