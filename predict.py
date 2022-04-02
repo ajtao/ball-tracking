@@ -89,7 +89,7 @@ out.write(image)
 
 # create a ball location CSV
 ball_loc = open(video_name + '_predict.csv', 'w')
-ball_loc.write('Frame, X, Y')
+ball_loc.write('Frame, X, Y\n')
 
 img = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 img = np.expand_dims(img, axis=2)
