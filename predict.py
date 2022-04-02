@@ -137,7 +137,7 @@ while success:
     h_pred = h_pred.astype('uint8')
     if np.amax(h_pred) <= 0:
         out.write(image)
-        ball_loc.write(',,')
+        ball_loc.write(',,\n')
     else:
         # _, cnts, _ = cv2.findContours(h_pred[0].copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
         cnts, _ = cv2.findContours(h_pred[0].copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
@@ -156,7 +156,7 @@ while success:
         cv2.circle(image_cp, (cx_pred, cy_pred), 5, (0,0,255), -1)
         out.write(image_cp)
         
-        ball_loc.write('%d, %d, %d' % (frame_no, cx_pred, cy_pred))
+        ball_loc.write('%d, %d, %d\n' % (frame_no, cx_pred, cy_pred))
 
 
     success, image = cap.read()
