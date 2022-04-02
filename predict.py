@@ -137,7 +137,7 @@ while success:
     h_pred = h_pred.astype('uint8')
     if np.amax(h_pred) <= 0:
         out.write(image)
-        ball_loc.write(',,\n')
+        ball_loc.write('%d,,\n' % (frame_no))
     else:
         # _, cnts, _ = cv2.findContours(h_pred[0].copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
         cnts, _ = cv2.findContours(h_pred[0].copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
