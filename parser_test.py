@@ -22,8 +22,12 @@ parser.add_argument('--frame_stack', type=int, default=3,
                     help='number of frames to be stacked(default: 3)')
 parser.add_argument('--save_weights', type=str, default='weights/TrackNet',
                     help='path for saving trained weights(default: weights/TrackNet)')
-parser.add_argument('--match_folder', type=str, default='train_data',
+parser.add_argument('--match_folder', type=str,
+                    default='/content/gdrive/MyDrive/vball/ball_tracking/train_data',
                     help='folder path of images(default: train_data)')
+parser.add_argument('--raw_data_dir', type=str,
+                    default='/content/gdrive/MyDrive/vball/ball_tracking/raw_data',
+                    help='folder path of raw input data')
 parser.add_argument('--split_ratio', type=float, default=0.9,
                     help='ratio of train-test split(default: train_data/y_data)')
 parser.add_argument('--lr', type=float, default=1.0,

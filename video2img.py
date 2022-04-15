@@ -54,7 +54,7 @@ def video2img(video, csv, output_path, match):
         count += 1
 
 if __name__ == '__main__':
-    raw_dir = 'raw_data'
+    raw_dir = args.raw_data_dir
     videos = sorted(glob.glob(os.path.join(raw_dir, '*.mp4')))
     csvs = sorted(glob.glob(os.path.join(raw_dir, '*.csv')))
 
@@ -67,7 +67,7 @@ if __name__ == '__main__':
             raise NameError("Video files and csv files are not corresponded")
 
         print("Convert Video: {}".format(video))
-        output_path = 'train_data/match%d'%(match)
+        output_path = f'{args.match_folder}/match{match}'
         if not os.path.isdir(output_path):
             os.mkdir(output_path)
             os.mkdir(os.sep.join([output_path, 'x_data']))
