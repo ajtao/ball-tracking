@@ -38,7 +38,7 @@ else:
 
 print('Beginning training......')
 match_path = args.match_folder
-match_list = [os.sep.join([os.getcwd(), match_path, match]) for match in os.listdir(match_path)]
+match_list = [os.sep.join([match_path, match]) for match in os.listdir(match_path)]
 
 wait = 0
 best_loss = float('inf')
