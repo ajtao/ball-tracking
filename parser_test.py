@@ -7,7 +7,7 @@ parser.add_argument('--WIDTH', type=int, default=512,
                     help='width of image input(default: 512)')
 parser.add_argument('--epochs', type=int, default=50,
                     help='number of training epochs(default: 50)')
-parser.add_argument('--load_weights', type=str, default="weights/TrackNet",
+parser.add_argument('--load_weights', type=str, default="/content/gdrive/MyDrive/vball/ball_tracking/weights",
                     help='path to load pre-trained weights(default: weights/TrackNet)')
 parser.add_argument('--sigma', type=float, default=2.5,
                     help='radius of circle generated in heat map(default: 2.5)')
@@ -20,7 +20,7 @@ parser.add_argument('--batch_size', type=int, default=2,
                     help='batch size(default: 2)')
 parser.add_argument('--frame_stack', type=int, default=3,
                     help='number of frames to be stacked(default: 3)')
-parser.add_argument('--save_weights', type=str, default='weights/TrackNet',
+parser.add_argument('--save_weights', type=str, default='/content/gdrive/MyDrive/vball/ball_tracking/weights',
                     help='path for saving trained weights(default: weights/TrackNet)')
 parser.add_argument('--match_folder', type=str,
                     default='/content/gdrive/MyDrive/vball/ball_tracking/train_data',
